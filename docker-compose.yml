@@ -1,0 +1,48 @@
+version: "3"
+services:
+  node-app:
+    container_name: curd-generator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      NODEMAILER_AUTH_USER: ${NODEMAILER_AUTH_USER}
+      NODEMAILER_CLIENT_ID: ${NODEMAILER_CLIENT_ID}
+      NODEMAILER_CLIENT_SECRET: ${NODEMAILER_CLIENT_SECRET}
+      NODEMAILER_ACCESS_TOKEN: ${NODEMAILER_ACCESS_TOKEN}
+      NODEMAILER_REFRESH_TOKEN: ${NODEMAILER_REFRESH_TOKEN}
+      NODEMAILER_EMAIL_FROM: ${NODEMAILER_EMAIL_FROM}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      LOKI_HOST: ${LOKI_HOST}
+      NODE_ENV: ${NODE_ENV}
+    restart: always
+    ports:
+      - "${PORT}:1063"
+    depends_on:
+      - postgres-services
+      - db-init
+
+  postgres-services:
+    image: postgres:latest
+    container_name: wil-postgres-services
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${DATABASE_PORT}:5432"
+    volumes:
+      - /Users/wiladmin/Desktop/curd-generator/curd-generator:/data/curd-generator
+
+  db-init:
+    build:
+      context: .
+    command: sh -c "npx prisma generate && npx prisma db push --force-reset && npx prisma db seed"
+    depends_on:
+      - postgres-services
+
+volumes:
+    curd-generator-data:

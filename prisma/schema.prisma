@@ -1,0 +1,65 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Entity {
+  id                        Int             @id @default(autoincrement())
+  username                  String          @unique @db.VarChar(255)
+  email                     String          @unique @db.VarChar(255)
+  password                  String          @db.VarChar(255)
+  first_name                String          @db.VarChar(120)
+  last_name                 String?         @db.VarChar(120)
+  mobile                    String          @db.VarChar(20)
+  address                   String          @db.VarChar(255)
+  country                   String          @db.VarChar(50)
+  gst_legal_entity_name     String          @db.VarChar(160)
+  gst_business_address      String          @db.VarChar(255)
+  gst_city_code             String          @db.VarChar(50)
+  gst_no                    String          @db.VarChar(160)
+  name_as_per_pan           String          @db.VarChar(120)
+  pan_no                    String          @db.VarChar(40)
+  pan_date_of_incorporation String          @db.VarChar(40)
+  subscriber_id             String          @db.VarChar(255)
+  subscriber_type           subscriber_type @default(BPP)
+  status                    status          @default(active)
+  role                      roles           @default(user)
+  created_at                DateTime        @default(now()) @db.Timestamptz(3)
+  updated_at                DateTime        @default(now()) @db.Timestamptz(3)
+  otpDetails                OtpDetail[]
+}
+
+model OtpDetail {
+  id        Int      @id @default(autoincrement())
+  otp       String
+  timestamp DateTime @default(now())
+  is_valid  Boolean  @default(true)
+  user_id   Int
+  entity    Entity   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+enum status {
+  active
+  inactive
+}
+
+enum logistic_type {
+  ONNETWORK
+  OFFNETWORK
+}
+
+enum roles {
+  user
+  admin
+}
+
+enum subscriber_type {
+  BPP
+  BAP
+  BG
+}
